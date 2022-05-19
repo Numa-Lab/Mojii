@@ -1,0 +1,5 @@
+name: Mojii
+version: '${project.version}'
+main: net.numalab.mojii.Mojii
+api-version: 1.16
+authors: [ Bun133 ]
