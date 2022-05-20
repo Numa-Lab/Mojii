@@ -3,7 +3,7 @@ package net.numalab.mojii.api
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 
-data class WikiMediaResponse(
+data class WikiMediaSearchResponse(
     val query: Query,
     val batchcomplete: String
 )

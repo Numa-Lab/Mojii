@@ -5,8 +5,8 @@ import com.github.kittinunf.fuel.gson.responseObject
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
 
-class WikiMediaSearchRequestTask(val req:WikiMediaSearchRequest) : TickedTask<Unit, WikiMediaSearchResponse>() {
-    override fun runnable(input: Unit): WikiMediaSearchResponse {
+class WikiMediaSummaryRequestTask(val req: WikiMediaSummaryRequest) : TickedTask<Unit, WikiMediaSummaryResponse>() {
+    override fun runnable(input: Unit): WikiMediaSummaryResponse {
         throw UnsupportedOperationException("Not supported yet.")
     }
 
@@ -14,7 +14,7 @@ class WikiMediaSearchRequestTask(val req:WikiMediaSearchRequest) : TickedTask<Un
         val r = req
             .url()
             .httpGet()
-            .responseObject<WikiMediaSearchResponse> { _, _, result ->
+            .responseObject<WikiMediaSummaryResponse> { _, _, result ->
                 when (result) {
                     is Result.Success -> {
                         nextNode?.run(result.value)
