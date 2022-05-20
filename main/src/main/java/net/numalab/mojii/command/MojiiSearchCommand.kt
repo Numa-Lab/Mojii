@@ -1,12 +1,11 @@
 package net.numalab.mojii.command
 
-import com.github.bun133.bukkitfly.component.text
 import com.github.bun133.tinked.RunnableTask
 import com.google.gson.Gson
 import dev.kotx.flylib.command.Command
 import dev.kotx.flylib.command.arguments.StringArgument
-import net.numalab.mojii.api.WikiMediaRequest
-import net.numalab.mojii.api.WikiMediaRequestTask
+import net.numalab.mojii.api.WikiMediaSearchRequest
+import net.numalab.mojii.api.WikiMediaSearchRequestTask
 import net.numalab.mojii.lang.Lang
 
 class MojiiSearchCommand : Command("search") {
@@ -26,7 +25,7 @@ class MojiiSearchCommand : Command("search") {
                 }
                 val keyword = this.typedArgs[1] as String
 
-                val task = WikiMediaRequestTask(WikiMediaRequest(keyword, lang))
+                val task = WikiMediaSearchRequestTask(WikiMediaSearchRequest(keyword, lang))
                     .apply {
                         then(RunnableTask {
                             success("検索結果 : $keyword in ${lang.langSet.langName()}")
