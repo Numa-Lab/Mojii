@@ -5,6 +5,10 @@ class EN : LangSet {
         return "English"
     }
 
+    override fun langCode(): String {
+        return "en"
+    }
+
     override fun chars(): CharSet {
         return ENCharSet()
     }

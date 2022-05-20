@@ -4,6 +4,10 @@ package net.numalab.mojii.lang
 class JP : LangSet {
     override fun langName(): String = "日本語"
 
+    override fun langCode(): String {
+        return "jp"
+    }
+
     override fun chars(): CharSet {
         return JPCharSet()
     }
