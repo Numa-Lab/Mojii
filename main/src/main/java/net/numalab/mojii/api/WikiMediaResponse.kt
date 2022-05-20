@@ -17,6 +17,8 @@ data class Query(
         return pages.asJsonObject.entrySet().map {
             val el = it.value
             gson.fromJson(el, Page::class.java)
+        }.filter {
+            it.pageid != 0  // 無効記事は除外
         }
     }
 }
@@ -35,5 +37,5 @@ data class Page(
     val pageid: Int,
     val ns: Int,
     val title: String,
-    val extract: String
+    val extract: String?
 )
