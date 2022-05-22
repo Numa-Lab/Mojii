@@ -7,7 +7,7 @@ import org.bukkit.map.MapView
 import java.awt.image.BufferedImage
 
 class MojiiMapRenderer(private val map: MojiiMap) : MapRenderer() {
-    val img = BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB)
+    var img = BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB)
 
     override fun render(map: MapView, canvas: MapCanvas, player: Player) {
         // remove all pointers
