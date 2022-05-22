@@ -1,6 +1,7 @@
 package net.numalab.mojii.lang
 
-import net.numalab.mojii.map.MojiiMap
+import net.numalab.mojii.map.Drawer
+import java.awt.image.BufferedImage
 
 open class CharSet(val chars: List<DrawableChar>) {
     operator fun contains(c: Char): Boolean {
@@ -8,8 +9,6 @@ open class CharSet(val chars: List<DrawableChar>) {
     }
 }
 
-class DrawableChar(val char: Char) {
-    fun drawTo(map: MojiiMap) {
-        // TODO 文字の描画
-    }
+abstract class DrawableChar(val char: Char) : Drawer {
+    abstract override fun draw(img: BufferedImage): BufferedImage
 }
