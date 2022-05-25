@@ -7,6 +7,8 @@ import net.numalab.mojii.listener.Listeners
 import org.bukkit.plugin.java.JavaPlugin
 
 class Mojii : JavaPlugin() {
+    lateinit var config: MojiiConfig
+
     init {
         flyLib {
             command(MojiiCommand())
@@ -14,6 +16,10 @@ class Mojii : JavaPlugin() {
     }
 
     override fun onEnable() {
+        config = MojiiConfig(this).also {
+            it.saveConfigIfAbsent()
+            it.loadConfig()
+        }
         Listeners(this)
     }
 
