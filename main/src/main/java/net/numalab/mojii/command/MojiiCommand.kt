@@ -25,6 +25,7 @@ class MojiiCommand : Command("mojii") {
                             p.sendMessage("文字列はありません")
                         } else {
                             p.sendMessage("===文字列===")
+                            p.sendMessage("Size: ${strings.size}")
                             strings.forEach { s ->
                                 p.sendMessage(s)
                             }

@@ -11,7 +11,7 @@ class ItemFrameGetter {
          * そのItemFrameのLocationをListで返す
          */
         fun getFrom(from: Location): List<List<ItemFrame>> {
-            return Direction.values().map { getFrom(from, it) }
+            return Direction.values().map { getFrom(from.toCenterLocation(), it) }
         }
 
         private fun getFrom(from: Location, direction: Direction): List<ItemFrame> {
@@ -36,8 +36,8 @@ class ItemFrameGetter {
         PZ(0, 1),
         NZ(0, -1),
         PXPZ(1, 1),
-        PXNZ(-1, -1),
-        NXNZ(1, -1),
+        PXNZ(1, -1),
+        NXNZ(-1, -1),
         NXPZ(-1, 1);
 
         fun addLocation(loc: Location): Location {
