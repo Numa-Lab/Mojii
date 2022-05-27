@@ -9,4 +9,20 @@ class WikiMediaSummaryRequest(val keyWord: String, val lang: Lang, val exchars: 
     }
 
     fun url() = url(keyWord, lang, exchars)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other is WikiMediaSummaryRequest) {
+            return keyWord == other.keyWord && lang == other.lang && exchars == other.exchars
+        }
+
+        return false
+    }
+
+    override fun hashCode(): Int {
+        var result = keyWord.hashCode()
+        result = 31 * result + lang.hashCode()
+        result = 31 * result + exchars
+        return result
+    }
 }

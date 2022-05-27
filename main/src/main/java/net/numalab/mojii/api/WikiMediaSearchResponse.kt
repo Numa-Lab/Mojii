@@ -21,6 +21,8 @@ data class Query(
             it.pageid != 0  // 無効記事は除外
         }
     }
+
+    fun isExist(gson:Gson) = getPages(gson).isNotEmpty()
 }
 
 data class Redirect(

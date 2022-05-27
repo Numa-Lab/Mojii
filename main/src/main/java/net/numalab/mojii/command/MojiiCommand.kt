@@ -3,9 +3,16 @@ package net.numalab.mojii.command
 import com.github.bun133.bukkitfly.component.text
 import com.github.bun133.tinked.EventTask
 import com.github.bun133.tinked.RunnableTask
+import com.github.bun133.tinked.TickedApplyedTask
 import com.github.bun133.tinked.WaitEventTask
+import com.google.gson.Gson
 import dev.kotx.flylib.command.Command
+import net.numalab.mojii.api.Query
+import net.numalab.mojii.api.WikiMediaCache
+import net.numalab.mojii.api.WikiMediaSearchRequest
+import net.numalab.mojii.api.WikiMediaSearchResponse
 import net.numalab.mojii.judge.StringGetter
+import net.numalab.mojii.lang.Lang
 import org.bukkit.entity.ItemFrame
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerInteractEntityEvent
@@ -13,7 +20,17 @@ import org.bukkit.plugin.java.JavaPlugin
 
 class MojiiCommand : Command("mojii") {
     companion object {
-        private fun mapGetTask(p: Player, plugin: JavaPlugin): EventTask<Unit, PlayerInteractEntityEvent> {
+        private fun isExistTask(
+            keyWord: String,
+            lang: Lang
+        ): TickedApplyedTask<Unit, WikiMediaSearchResponse, Boolean> {
+            return WikiMediaCache.instance.search(WikiMediaSearchRequest(keyWord, lang))
+                .apply(RunnableTask {
+                    return@RunnableTask it.query.isExist(Gson())
+                })
+        }
+
+        private fun mapGetTask(p: Player, lang: Lang, plugin: JavaPlugin): EventTask<Unit, PlayerInteractEntityEvent> {
             return EventTask<Unit, PlayerInteractEntityEvent>({
                 return@EventTask it.player == p && it.rightClicked is ItemFrame
             }, plugin, PlayerInteractEntityEvent::class.java)
@@ -26,9 +43,12 @@ class MojiiCommand : Command("mojii") {
                         } else {
                             p.sendMessage("===文字列===")
                             p.sendMessage("Size: ${strings.size}")
-                            strings.forEach { s ->
-                                p.sendMessage(s)
-                            }
+                            strings.map { s -> s to isExistTask(s, lang) }
+                                .forEach { t ->
+                                    t.second.apply(RunnableTask { b ->
+                                        p.sendMessage("${t.first}: $b")
+                                    }).run(Unit)
+                                }
                         }
                     })
                 }
@@ -46,12 +66,21 @@ class MojiiCommand : Command("mojii") {
         )
         usage {
             selectionArgument("Task", "MojiiMapGet")
+            selectionArgument("LangCode", Lang.values().map { it.name })
             executes {
+                val langCode = this.typedArgs[1] as String
+                val lang: Lang
+                try {
+                    lang = Lang.valueOf(langCode)
+                } catch (e: IllegalArgumentException) {
+                    fail("LangCodeが不正です")
+                    return@executes
+                }
                 when (val t = typedArgs[0] as String) {
                     "MojiiMapGet" -> {
                         val p = player
                         if (p != null) {
-                            val task = mapGetTask(p, plugin)
+                            val task = mapGetTask(p, lang, plugin)
                             success("MojiiMapを回転させてください")
                             task.run(Unit)
                         } else {
