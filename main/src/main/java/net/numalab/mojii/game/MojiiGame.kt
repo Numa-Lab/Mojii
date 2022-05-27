@@ -16,4 +16,9 @@ class MojiiGame(val setting: MojiiGameSetting) {
     fun nextTurn() {
         now = (now + 1) % setting.teams.size
     }
+
+    private val score = mutableMapOf<Team, Int>()
+    fun updateScore(team:Team,scoreInt:Int){
+        score[team] = scoreInt
+    }
 }
