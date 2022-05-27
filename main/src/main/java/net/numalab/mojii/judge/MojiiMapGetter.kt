@@ -25,7 +25,7 @@ private fun <T : Any> List<T?>.beforeFirstNull(): List<T> {
             emptyList()
         }
         else -> {
-            this.subList(0, firstNullIndex - 1).filterNotNull()
+            this.subList(0, firstNullIndex).filterNotNull()
         }
     }
 }
