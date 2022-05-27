@@ -22,7 +22,9 @@ data class Query(
         }
     }
 
-    fun isExist(gson:Gson) = getPages(gson).isNotEmpty()
+    fun getTitle(gson: Gson) = getPages(gson).firstOrNull()?.title
+
+    fun isExist(gson: Gson) = getPages(gson).isNotEmpty()
 }
 
 data class Redirect(

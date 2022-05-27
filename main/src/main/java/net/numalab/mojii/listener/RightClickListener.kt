@@ -1,10 +1,21 @@
 package net.numalab.mojii.listener
 
 import com.github.bun133.tinked.RunnableTask
+import com.github.bun133.tinked.Task
 import com.github.bun133.tinked.WaitTask
+import com.google.gson.Gson
+import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.format.NamedTextColor
 import net.numalab.mojii.Mojii
+import net.numalab.mojii.api.WikiMediaCache
+import net.numalab.mojii.api.WikiMediaSummaryRequest
+import net.numalab.mojii.api.WikiMediaSummaryResponse
+import net.numalab.mojii.judge.StringGetter
+import net.numalab.mojii.lang.Lang
 import net.numalab.mojii.map.MojiiMap
 import net.numalab.mojii.map.toMojiiMap
+import org.bukkit.Color
+import org.bukkit.DyeColor
 import org.bukkit.Location
 import org.bukkit.Rotation
 import org.bukkit.entity.ItemFrame
@@ -57,13 +68,76 @@ class RightClickListener(val plugin: Mojii) : Listener {
      */
     fun onRightClickMojii(e: PlayerInteractEntityEvent, frame: ItemFrame, team: Team) {
         frame.rotation = Rotation.NONE // 回転を元に戻す
-        updateFromMojiiMap(frame.location.block.location, team)
+        updateFromMojiiMap(frame.location.block.location, team, e)
     }
 
     /**
      * 指定された座標中心に単語ができていないか確認する
      */
-    private fun updateFromMojiiMap(loc: Location, team: Team) {
+    private fun updateFromMojiiMap(loc: Location, team: Team, e: PlayerInteractEntityEvent) {
+        val g = plugin.currentGame
+        if (g != null) {
+            if (g.getTurnTeam() == team) {
+                // 単語の成立判定をする
+                val s = StringGetter.getFrom(loc)
+                val getSummary =
+                    getSummaryAll(g.setting.lang, exchars = plugin.config.exChars.value(), *s.toTypedArray())
+                val filterSummary = filterSummary()
+            } else {
+                // 今ターンのチームではない
+                e.isCancelled = true
+                e.player.sendMessage(text("${team.name}のターンではありません", NamedTextColor.RED))
+            }
+        } else {
+            // ゲームが開始していない
+        }
+    }
 
+    /**
+     * KeyWordからWikiMediaSummaryを取得する
+     */
+    private fun getSummaryAll(
+        lang: Lang,
+        exchars: Int,
+        vararg keyWord: Pair<String, List<Pair<MojiiMap, ItemFrame>>>
+    ): Task<Unit, List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>> {
+        return Task.all(
+            *(keyWord.map {
+                WikiMediaCache.instance.summary(
+                    WikiMediaSummaryRequest(it.first, lang, exchars)
+                ).apply(RunnableTask { s -> s to it.second })
+            }).toTypedArray()
+        )
+    }
+
+    /**
+     * 2文字以上で存在するWikiMediaSummaryを取得するタスク
+     */
+    private fun filterSummary(): RunnableTask<List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>, List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>> {
+        val gson = Gson()
+        return RunnableTask<List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>, List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>> {
+            return@RunnableTask it.filter { s ->
+                s.first.query.isExist(gson) && (s.first.query.getTitle(gson)?.length ?: 0) >= 2
+            }
+        }
+    }
+
+    private fun effectAll(backGroundColor: Color, effectColor: DyeColor, vararg frame: Pair<MojiiMap, ItemFrame>) {
+
+    }
+
+    /**
+     * 指定されたFrameをコンフィグに基づいて指定時間背景の色を変える+エフェクトを出す
+     */
+    private fun effect(
+        backGroundColor: java.awt.Color,
+        effectColor: DyeColor,
+        frame: Pair<MojiiMap, ItemFrame>
+    ): RunnableTask<Unit, java.awt.Color> {
+        return RunnableTask<Unit, java.awt.Color> {
+            val c = frame.first.mapDrawer.background.color
+            frame.first.mapDrawer.background.color = backGroundColor
+            return@RunnableTask c
+        }   // TODO RepeatTask使ってエフェクト出し続ける
     }
 }
