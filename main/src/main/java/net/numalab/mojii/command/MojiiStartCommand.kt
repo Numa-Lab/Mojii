@@ -11,7 +11,7 @@ class MojiiStartCommand : Command("start") {
         description("start mojii game")
         usage {
             selectionArgument("LangCode", Lang.values().map { it.name })
-            integerArgument("ClearLine", 1)
+            integerArgument("ClearCardAmount", 1)
             executes {
                 val lang: Lang
                 try {
@@ -20,14 +20,16 @@ class MojiiStartCommand : Command("start") {
                     fail("Invalid LangCode")
                     return@executes
                 }
-                val clearLine = this.typedArgs[1] as Int
+                val clearCardAmount = this.typedArgs[1] as Int
 
                 val pl = plugin as Mojii
                 if (pl.currentGame != null) {
                     success("進行中のゲームを中断します")
                 }
 
-                pl.currentGame = MojiiGame(MojiiGameSetting(pl.config.team().toList(), lang, clearLine))
+                pl.currentGame = MojiiGame(MojiiGameSetting(pl.config.team().toList(), lang, clearCardAmount))
+
+                success("ゲームを開始しました")
             }
         }
     }

@@ -1,5 +1,10 @@
 package net.numalab.mojii.listener
 
+import com.github.bun133.bukkitfly.component.toAWTColor
+import com.github.bun133.bukkitfly.particle.BoxParticle
+import com.github.bun133.bukkitfly.score.getColorSafe
+import com.github.bun133.bukkitfly.util.Box
+import com.github.bun133.tinked.RepeatTask
 import com.github.bun133.tinked.RunnableTask
 import com.github.bun133.tinked.Task
 import com.github.bun133.tinked.WaitTask
@@ -14,10 +19,7 @@ import net.numalab.mojii.judge.StringGetter
 import net.numalab.mojii.lang.Lang
 import net.numalab.mojii.map.MojiiMap
 import net.numalab.mojii.map.toMojiiMap
-import org.bukkit.Color
-import org.bukkit.DyeColor
-import org.bukkit.Location
-import org.bukkit.Rotation
+import org.bukkit.*
 import org.bukkit.entity.ItemFrame
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -80,9 +82,12 @@ class RightClickListener(val plugin: Mojii) : Listener {
             if (g.getTurnTeam() == team) {
                 // 単語の成立判定をする
                 val s = StringGetter.getFrom(loc)
-                val getSummary =
-                    getSummaryAll(g.setting.lang, exchars = plugin.config.exChars.value(), *s.toTypedArray())
-                val filterSummary = filterSummary()
+                val task = getSummaryAll(g.setting.lang, exchars = plugin.config.exChars.value(), *s.toTypedArray())
+                    .apply(filterSummary())
+                    .apply(displayAll(team.getColorSafe().toAWTColor()))
+                task.run(Unit)
+
+                g.nextTurn()
             } else {
                 // 今ターンのチームではない
                 e.isCancelled = true
@@ -105,7 +110,9 @@ class RightClickListener(val plugin: Mojii) : Listener {
             *(keyWord.map {
                 WikiMediaCache.instance.summary(
                     WikiMediaSummaryRequest(it.first, lang, exchars)
-                ).apply(RunnableTask { s -> s to it.second })
+                ).apply(RunnableTask { s ->
+                    s to it.second
+                })
             }).toTypedArray()
         )
     }
@@ -118,12 +125,8 @@ class RightClickListener(val plugin: Mojii) : Listener {
         return RunnableTask<List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>, List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>> {
             return@RunnableTask it.filter { s ->
                 s.first.query.isExist(gson) && (s.first.query.getTitle(gson)?.length ?: 0) >= 2
-            }
+            }.also { l -> println("Size:${l.size}") }
         }
-    }
-
-    private fun effectAll(backGroundColor: Color, effectColor: DyeColor, vararg frame: Pair<MojiiMap, ItemFrame>) {
-
     }
 
     /**
@@ -131,13 +134,52 @@ class RightClickListener(val plugin: Mojii) : Listener {
      */
     private fun effect(
         backGroundColor: java.awt.Color,
-        effectColor: DyeColor,
         frame: Pair<MojiiMap, ItemFrame>
-    ): RunnableTask<Unit, java.awt.Color> {
+    ): Task<Unit, Unit> {
+        val boxParticle = BoxParticle(
+            Box.of(frame.second.boundingBox),
+            plugin.config.particleType.value(),
+            0.1
+        )
+
         return RunnableTask<Unit, java.awt.Color> {
             val c = frame.first.mapDrawer.background.color
             frame.first.mapDrawer.background.color = backGroundColor
+            frame.first.redraw()
             return@RunnableTask c
-        }   // TODO RepeatTask使ってエフェクト出し続ける
+        }.apply(RepeatTask(plugin.config.effectTick.value().toLong(), plugin) { c: java.awt.Color, now: Long ->
+            boxParticle.playEffect(frame.second.location.world)
+        }).apply(RunnableTask<java.awt.Color, Unit> {
+            frame.first.mapDrawer.background.color = it
+            frame.first.redraw()
+        })
+    }
+
+    /**
+     * 指定されたフレームとSummaryに基づいて、指定された時間で背景色を変える+Summaryを出す
+     */
+    private fun display(
+        backGroundColor: java.awt.Color,
+    ): RunnableTask<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>, Unit> {
+        return RunnableTask<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>, Unit> {
+            println("Display")
+
+            it.second.forEach { p ->
+                // すべてにエフェクトをかける
+                effect(backGroundColor, p).run(Unit)
+            }
+
+            // BroadCast Summary
+            Bukkit.broadcast(text(it.first.query.getTitle(Gson())!!, NamedTextColor.AQUA))
+        }
+    }
+
+    /**
+     * すべての結果に対して、それぞれ時間をあけながらdisplayを実行する
+     */
+    private fun displayAll(backGroundColor: java.awt.Color): Task<List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>, Unit> {
+        return Task.forEach {
+            display(backGroundColor).apply(WaitTask(plugin.config.effectInterval.value().toLong(), plugin))
+        }
     }
 }

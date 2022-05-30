@@ -157,13 +157,13 @@
         <dependency>
             <groupId>com.github.Bun133</groupId>
             <artifactId>BukkitFly</artifactId>
-            <version>de65c0fd74</version>
+            <version>3cc6f2a1f5</version>
         </dependency>
 
         <dependency>
             <groupId>com.github.Bun133</groupId>
             <artifactId>Tinked</artifactId>
-            <version>8bac63edd7</version>
+            <version>3fd778a78f</version>
         </dependency>
 
         <dependency>

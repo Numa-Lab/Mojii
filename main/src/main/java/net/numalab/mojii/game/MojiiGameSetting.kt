@@ -7,5 +7,5 @@ data class MojiiGameSetting(
     val teams: List<Team>,
     val lang: Lang,
     // 何枚とったら勝つか
-    val clearLine: Int
+    val clearCardAmount: Int
 )

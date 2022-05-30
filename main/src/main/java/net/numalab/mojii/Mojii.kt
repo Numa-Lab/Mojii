@@ -11,16 +11,14 @@ class Mojii : JavaPlugin() {
     lateinit var config: MojiiConfig
     lateinit var scoreBoard: MojiiGameScoreBoard
 
-    init {
-        flyLib {
-            command(MojiiCommand())
-        }
-    }
 
     override fun onEnable() {
         config = MojiiConfig(this).also {
             it.saveConfigIfAbsent()
             it.loadConfig()
+        }
+        flyLib {
+            command(MojiiCommand(config))
         }
         scoreBoard = MojiiGameScoreBoard()
         Listeners(this)

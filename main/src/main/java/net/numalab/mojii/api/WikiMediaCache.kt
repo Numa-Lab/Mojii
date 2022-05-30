@@ -1,11 +1,13 @@
 package net.numalab.mojii.api
 
+import com.github.bun133.tinked.RunnableTask
 import com.github.bun133.tinked.TickedTask
 
 class WikiMediaCache {
-    companion object{
+    companion object {
         val instance = WikiMediaCache()
     }
+
     private val summaryCache = mutableMapOf<WikiMediaSummaryRequest, WikiMediaSummaryResponse>()
     private val searchCache = mutableMapOf<WikiMediaSearchRequest, WikiMediaSearchResponse>()
 
@@ -14,7 +16,7 @@ class WikiMediaCache {
         if (e != null) {
             return instantTickedTask(e)
         } else {
-            return WikiMediaSummaryRequestTask(req)
+            return WikiMediaSummaryRequestTask(req).apply(RunnableTask { summaryCache[req] = it;it })
         }
     }
 
@@ -23,7 +25,7 @@ class WikiMediaCache {
         if (e != null) {
             return instantTickedTask(e)
         } else {
-            return WikiMediaSearchRequestTask(req)
+            return WikiMediaSearchRequestTask(req).apply(RunnableTask { searchCache[req] = it;it })
         }
     }
 }

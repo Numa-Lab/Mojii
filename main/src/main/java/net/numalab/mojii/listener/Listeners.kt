@@ -8,6 +8,7 @@ class Listeners(val plugin: Mojii) {
 
     init {
         register(PickupListener(plugin))
+        register(RightClickListener(plugin))
     }
 
     private fun register(listener: Listener) {
