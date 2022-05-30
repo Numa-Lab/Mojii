@@ -2,6 +2,7 @@ package net.numalab.mojii.api
 
 import net.numalab.mojii.lang.Lang
 
+// FIXME ひらがなで検索をかけると、カタカナには変換されることはない(ひらがなでも表記する単語はちゃんと返ってくる)
 class WikiMediaSummaryRequest(val keyWord: String, val lang: Lang, val exchars: Int) {
     companion object {
         val url =

@@ -125,7 +125,7 @@ class RightClickListener(val plugin: Mojii) : Listener {
         return RunnableTask<List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>, List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>> {
             return@RunnableTask it.filter { s ->
                 s.first.query.isExist(gson) && (s.first.query.getTitle(gson)?.length ?: 0) >= 2
-            }.also { l -> println("Size:${l.size}") }
+            }
         }
     }
 
@@ -170,6 +170,7 @@ class RightClickListener(val plugin: Mojii) : Listener {
             }
 
             // BroadCast Summary
+            // TODO タイトル以外も出す
             Bukkit.broadcast(text(it.first.query.getTitle(Gson())!!, NamedTextColor.AQUA))
         }
     }
