@@ -162,8 +162,6 @@ class RightClickListener(val plugin: Mojii) : Listener {
         backGroundColor: java.awt.Color,
     ): RunnableTask<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>, Unit> {
         return RunnableTask<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>, Unit> {
-            println("Display")
-
             it.second.forEach { p ->
                 // すべてにエフェクトをかける
                 effect(backGroundColor, p).run(Unit)
