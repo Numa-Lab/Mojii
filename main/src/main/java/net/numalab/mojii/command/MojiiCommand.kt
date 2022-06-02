@@ -7,6 +7,7 @@ import com.github.bun133.tinked.TickedApplyedTask
 import com.github.bun133.tinked.WaitEventTask
 import com.google.gson.Gson
 import dev.kotx.flylib.command.Command
+import net.kunmc.lab.configlib.ConfigCommandBuilder
 import net.numalab.mojii.MojiiConfig
 import net.numalab.mojii.api.Query
 import net.numalab.mojii.api.WikiMediaCache
@@ -19,7 +20,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.plugin.java.JavaPlugin
 
-class MojiiCommand(val conf:MojiiConfig) : Command("mojii") {
+class MojiiCommand(val conf: MojiiConfig) : Command("mojii") {
     companion object {
         private fun isExistTask(
             keyWord: String,
@@ -64,7 +65,8 @@ class MojiiCommand(val conf:MojiiConfig) : Command("mojii") {
             MojiiCharItemCommand(),
             MojiiMapForceRedraw(),
             MojiiLangItemCommand(),
-            MojiiTeamCommand(conf)
+            MojiiTeamCommand(conf),
+            ConfigCommandBuilder(conf).build()
         )
         usage {
             selectionArgument("Task", "MojiiMapGet")

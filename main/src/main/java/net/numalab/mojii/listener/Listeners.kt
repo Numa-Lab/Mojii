@@ -9,6 +9,7 @@ class Listeners(val plugin: Mojii) {
     init {
         register(PickupListener(plugin))
         register(RightClickListener(plugin))
+        register(LeftClickListener(plugin))
     }
 
     private fun register(listener: Listener) {

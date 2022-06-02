@@ -5,6 +5,7 @@ import net.kunmc.lab.configlib.value.EnumValue
 import net.kunmc.lab.configlib.value.IntegerValue
 import net.kunmc.lab.configlib.value.collection.TeamSetValue
 import org.bukkit.DyeColor
+import org.bukkit.GameMode
 import org.bukkit.Particle
 import org.bukkit.plugin.Plugin
 import org.bukkit.scoreboard.Team
@@ -35,4 +36,7 @@ class MojiiConfig(plugin: Plugin) : BaseConfig(plugin) {
 
     // エフェクト演出のパーティクルの種類
     val particleType = EnumValue<Particle>(Particle.SOUL_FIRE_FLAME)
+
+    // ターゲットのゲームモード
+    val targetGameMode = EnumValue<GameMode>(GameMode.SURVIVAL)
 }
