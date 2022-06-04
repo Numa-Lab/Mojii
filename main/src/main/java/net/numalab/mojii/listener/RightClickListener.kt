@@ -86,7 +86,7 @@ class RightClickListener(val plugin: Mojii) : Listener {
                 val s = StringGetter.getFrom(loc)
                 val task = getSummaryAll(g.setting.lang, exchars = plugin.config.exChars.value(), *s.toTypedArray())
                     .apply(filterSummary())
-                    .apply(displayAll(team.getColorSafe().toAWTColor()))
+                    .apply(displayAll(team.getColorSafe().toAWTColor(), team))
                     .apply(RunnableTask {
                         if (it) {
                             // イベントをキャンセル
@@ -157,19 +157,9 @@ class RightClickListener(val plugin: Mojii) : Listener {
             0.1
         )
 
-        return RunnableTask<Unit, java.awt.Color> {
-            // 色を変更
-            val c = frame.first.mapDrawer.background.color
-            frame.first.mapDrawer.background.color = backGroundColor
-            frame.first.redraw()
-            return@RunnableTask c
-        }.apply(RepeatTask(plugin.config.effectTick.value().toLong(), plugin) { c: java.awt.Color, now: Long ->
+        return RepeatTask(plugin.config.effectTick.value().toLong(), plugin) { u: Unit, now: Long ->
             boxParticle.playEffect(frame.second.location.world)
-        }).apply(RunnableTask<java.awt.Color, Unit> {
-            // 色を戻す
-            frame.first.mapDrawer.background.color = it
-            frame.first.redraw()
-        })
+        }
     }
 
     /**
@@ -177,11 +167,14 @@ class RightClickListener(val plugin: Mojii) : Listener {
      */
     private fun display(
         backGroundColor: java.awt.Color,
+        team: Team
     ): RunnableTask<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>, Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>> {
         return RunnableTask<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>, Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>> {
             it.second.forEach { p ->
                 // すべてにエフェクトをかける
                 effect(backGroundColor, p).run(Unit)
+                // すべてをチームの物にする
+                p.first.ownedTeam = team
             }
 
             // BroadCast Summary
@@ -195,13 +188,16 @@ class RightClickListener(val plugin: Mojii) : Listener {
     /**
      * すべての結果に対して、それぞれ時間をあけながらdisplayを実行する
      */
-    private fun displayAll(backGroundColor: java.awt.Color): Task<List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>, Boolean> {
+    private fun displayAll(
+        backGroundColor: java.awt.Color,
+        team: Team
+    ): Task<List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>, Boolean> {
         var r = false
         return RunnableTask<List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>, List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>> {
             r = it.isEmpty()
             return@RunnableTask it
         }.apply(Task.forEach {
-            display(backGroundColor).apply(WaitTask(plugin.config.effectInterval.value().toLong(), plugin))
+            display(backGroundColor, team).apply(WaitTask(plugin.config.effectInterval.value().toLong(), plugin))
         }).apply(RunnableTask { r })
     }
 }

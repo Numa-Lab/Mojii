@@ -1,8 +1,11 @@
 package net.numalab.mojii.map
 
 import com.github.bun133.bukkitfly.component.text
+import com.github.bun133.bukkitfly.component.toAWTColor
+import com.github.bun133.bukkitfly.score.getColorSafe
 import com.github.bun133.bukkitfly.stack.DelegatedItemStack
 import com.github.bun133.bukkitfly.stack.DelegatedItemStack.Delegates.ItemMeta.mapMeta
+import net.kyori.adventure.text.format.NamedTextColor
 import net.numalab.mojii.lang.DrawableChar
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -10,6 +13,8 @@ import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.MapMeta
+import org.bukkit.scoreboard.Team
+import java.awt.Color
 import kotlin.reflect.KProperty
 
 class MojiiMap(stack: ItemStack, var char: DrawableChar) : DelegatedItemStack(stack) {
@@ -26,8 +31,24 @@ class MojiiMap(stack: ItemStack, var char: DrawableChar) : DelegatedItemStack(st
     val mapRenderer: MojiiMapRenderer? by Delegate.MojiiRenderer(this)
     val mapDrawer: MojiiMapDrawer = MojiiMapDrawer(this)
 
+    // このマップの所有チーム
+    var ownedTeam: Team? = null
+        set(value) {
+            // 自動更新
+            field = value
+            updateColor()
+            redraw()
+        }
+
     fun redraw() {
         mapDrawer.redraw()
+    }
+
+    /**
+     * 背景の色をチームの色に応じて設定する
+     */
+    private fun updateColor() {
+        mapDrawer.background.color = ownedTeam?.getColorSafe(NamedTextColor.WHITE)?.toAWTColor() ?: Color.WHITE
     }
 
     object Delegate {
