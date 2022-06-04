@@ -3,6 +3,7 @@ package net.numalab.mojii.listener
 import com.github.bun133.bukkitfly.component.toAWTColor
 import com.github.bun133.bukkitfly.particle.BoxParticle
 import com.github.bun133.bukkitfly.score.getColorSafe
+import com.github.bun133.bukkitfly.stack.addOrDrop
 import com.github.bun133.bukkitfly.util.Box
 import com.github.bun133.tinked.RepeatTask
 import com.github.bun133.tinked.RunnableTask
@@ -24,6 +25,7 @@ import org.bukkit.entity.ItemFrame
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEntityEvent
+import org.bukkit.inventory.ItemStack
 import org.bukkit.scoreboard.Team
 
 class RightClickListener(val plugin: Mojii) : Listener {
@@ -70,13 +72,13 @@ class RightClickListener(val plugin: Mojii) : Listener {
      */
     fun onRightClickMojii(e: PlayerInteractEntityEvent, frame: ItemFrame, team: Team) {
         frame.rotation = Rotation.NONE // 回転を元に戻す
-        updateFromMojiiMap(frame.location.block.location, team, e)
+        updateFromMojiiMap(frame.location.block.location, team, e, frame)
     }
 
     /**
      * 指定された座標中心に単語ができていないか確認する
      */
-    private fun updateFromMojiiMap(loc: Location, team: Team, e: PlayerInteractEntityEvent) {
+    private fun updateFromMojiiMap(loc: Location, team: Team, e: PlayerInteractEntityEvent, frame: ItemFrame) {
         val g = plugin.currentGame
         if (g != null) {
             if (g.getTurnTeam() == team) {
@@ -85,9 +87,21 @@ class RightClickListener(val plugin: Mojii) : Listener {
                 val task = getSummaryAll(g.setting.lang, exchars = plugin.config.exChars.value(), *s.toTypedArray())
                     .apply(filterSummary())
                     .apply(displayAll(team.getColorSafe().toAWTColor()))
+                    .apply(RunnableTask {
+                        if (it) {
+                            // イベントをキャンセル
+                            e.player.sendMessage(text("単語が成立しませんでした", NamedTextColor.GREEN))
+                            e.isCancelled = true
+                            // 強制的にアイテムを取り出す
+                            val st = frame.item
+                            e.player.inventory.addOrDrop(st)
+                            frame.setItem(null)
+                        } else {
+                            // 次のターンへ
+                            g.nextTurn()
+                        }
+                    })
                 task.run(Unit)
-
-                g.nextTurn()
             } else {
                 // 今ターンのチームではない
                 e.isCancelled = true
@@ -110,9 +124,10 @@ class RightClickListener(val plugin: Mojii) : Listener {
             *(keyWord.map {
                 WikiMediaCache.instance.summary(
                     WikiMediaSummaryRequest(it.first, lang, exchars)
-                ).apply(RunnableTask { s ->
-                    s to it.second
-                })
+                )
+                    .apply(RunnableTask<WikiMediaSummaryResponse, Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>> { s ->
+                        s to it.second
+                    })
             }).toTypedArray()
         )
     }
@@ -160,8 +175,8 @@ class RightClickListener(val plugin: Mojii) : Listener {
      */
     private fun display(
         backGroundColor: java.awt.Color,
-    ): RunnableTask<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>, Unit> {
-        return RunnableTask<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>, Unit> {
+    ): RunnableTask<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>, Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>> {
+        return RunnableTask<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>, Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>> {
             it.second.forEach { p ->
                 // すべてにエフェクトをかける
                 effect(backGroundColor, p).run(Unit)
@@ -170,15 +185,21 @@ class RightClickListener(val plugin: Mojii) : Listener {
             // BroadCast Summary
             // TODO タイトル以外も出す
             Bukkit.broadcast(text(it.first.query.getTitle(Gson())!!, NamedTextColor.AQUA))
+
+            return@RunnableTask it
         }
     }
 
     /**
      * すべての結果に対して、それぞれ時間をあけながらdisplayを実行する
      */
-    private fun displayAll(backGroundColor: java.awt.Color): Task<List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>, Unit> {
-        return Task.forEach {
+    private fun displayAll(backGroundColor: java.awt.Color): Task<List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>, Boolean> {
+        var r = false
+        return RunnableTask<List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>, List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>> {
+            r = it.isEmpty()
+            return@RunnableTask it
+        }.apply(Task.forEach {
             display(backGroundColor).apply(WaitTask(plugin.config.effectInterval.value().toLong(), plugin))
-        }
+        }).apply(RunnableTask { r })
     }
 }

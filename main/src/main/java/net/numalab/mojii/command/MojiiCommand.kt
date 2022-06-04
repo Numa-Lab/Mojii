@@ -61,6 +61,7 @@ class MojiiCommand(val conf: MojiiConfig) : Command("mojii") {
         description("The root command of mojii")
         children(
             MojiiStartCommand(),
+            MojiiStopCommand(),
             MojiiSearchCommand(),
             MojiiCharItemCommand(),
             MojiiMapForceRedraw(),

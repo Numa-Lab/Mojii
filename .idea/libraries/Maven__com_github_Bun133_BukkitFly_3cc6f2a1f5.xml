@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.github.Bun133:BukkitFly:3cc6f2a1f5">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/Bun133/BukkitFly/3cc6f2a1f5/BukkitFly-3cc6f2a1f5.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/Bun133/BukkitFly/3cc6f2a1f5/BukkitFly-3cc6f2a1f5-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/Bun133/BukkitFly/3cc6f2a1f5/BukkitFly-3cc6f2a1f5-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
