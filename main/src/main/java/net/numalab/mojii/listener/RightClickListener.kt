@@ -32,7 +32,7 @@ class RightClickListener(val plugin: Mojii) : Listener {
     @EventHandler
     fun onRightClickEntity(e: PlayerInteractEntityEvent) {
         val en = e.rightClicked
-        val team = plugin.config.team().find { it.entries.contains(e.player.name) }
+        val team = Bukkit.getServer().scoreboardManager.mainScoreboard.teams.find { it.entries.contains(e.player.name) }
         if (en is ItemFrame && team != null) {
             onRightClickItemFrame(e, en, team)
         }
@@ -158,6 +158,7 @@ class RightClickListener(val plugin: Mojii) : Listener {
         )
 
         return RunnableTask<Unit, java.awt.Color> {
+            // 色を変更
             val c = frame.first.mapDrawer.background.color
             frame.first.mapDrawer.background.color = backGroundColor
             frame.first.redraw()
@@ -165,6 +166,7 @@ class RightClickListener(val plugin: Mojii) : Listener {
         }.apply(RepeatTask(plugin.config.effectTick.value().toLong(), plugin) { c: java.awt.Color, now: Long ->
             boxParticle.playEffect(frame.second.location.world)
         }).apply(RunnableTask<java.awt.Color, Unit> {
+            // 色を戻す
             frame.first.mapDrawer.background.color = it
             frame.first.redraw()
         })

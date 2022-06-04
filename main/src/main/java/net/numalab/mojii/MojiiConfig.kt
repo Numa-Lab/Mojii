@@ -35,7 +35,7 @@ class MojiiConfig(plugin: Plugin) : BaseConfig(plugin) {
     val effectInterval = IntegerValue(20 * 1, 1, Int.MAX_VALUE)
 
     // エフェクト演出のパーティクルの種類
-    val particleType = EnumValue<Particle>(Particle.SOUL_FIRE_FLAME)
+    val particleType = EnumValue<Particle>(Particle.FALLING_LAVA)
 
     // ターゲットのゲームモード
     val targetGameMode = EnumValue<GameMode>(GameMode.SURVIVAL)

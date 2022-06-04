@@ -27,9 +27,13 @@ class MojiiStartCommand : Command("start") {
                     success("進行中のゲームを中断します")
                 }
 
-                pl.currentGame = MojiiGame(MojiiGameSetting(pl.config.team().toList(), lang, clearCardAmount))
-
-                success("ゲームを開始しました")
+                val tm = pl.config.team().toList()
+                if (tm.isEmpty()){
+                    fail("チームが設定されていません")
+                }else{
+                    pl.currentGame = MojiiGame(MojiiGameSetting(pl.config.team().toList(), lang, clearCardAmount))
+                    success("ゲームを開始しました")
+                }
             }
         }
     }
