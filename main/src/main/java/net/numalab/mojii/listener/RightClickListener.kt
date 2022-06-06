@@ -16,6 +16,7 @@ import net.numalab.mojii.Mojii
 import net.numalab.mojii.api.WikiMediaCache
 import net.numalab.mojii.api.WikiMediaSummaryRequest
 import net.numalab.mojii.api.WikiMediaSummaryResponse
+import net.numalab.mojii.game.MojiiGame
 import net.numalab.mojii.judge.StringGetter
 import net.numalab.mojii.lang.Lang
 import net.numalab.mojii.map.MojiiMap
@@ -86,7 +87,7 @@ class RightClickListener(val plugin: Mojii) : Listener {
                 val s = StringGetter.getFrom(loc)
                 val task = getSummaryAll(g.setting.lang, exchars = plugin.config.exChars.value(), *s.toTypedArray())
                     .apply(filterSummary())
-                    .apply(displayAll(team.getColorSafe().toAWTColor(), team))
+                    .apply(displayAll(team.getColorSafe().toAWTColor(), team, g))
                     .apply(RunnableTask {
                         if (it) {
                             // イベントをキャンセル
@@ -98,7 +99,13 @@ class RightClickListener(val plugin: Mojii) : Listener {
                             frame.setItem(null)
                         } else {
                             // 次のターンへ
-                            g.nextTurn()
+                            val winner = g.checkWinner()
+                            if (winner != null) {
+                                // 終了処理
+                                plugin.currentGame = null
+                            } else {
+                                g.nextTurn()
+                            }
                         }
                     })
                 task.run(Unit)
@@ -167,7 +174,8 @@ class RightClickListener(val plugin: Mojii) : Listener {
      */
     private fun display(
         backGroundColor: java.awt.Color,
-        team: Team
+        team: Team,
+        g: MojiiGame
     ): RunnableTask<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>, Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>> {
         return RunnableTask<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>, Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>> {
             it.second.forEach { p ->
@@ -175,6 +183,8 @@ class RightClickListener(val plugin: Mojii) : Listener {
                 effect(backGroundColor, p).run(Unit)
                 // すべてをチームの物にする
                 p.first.ownedTeam = team
+                // すべてをゲームデータと結びつける
+                g.registerMap(p.first)
             }
 
             // BroadCast Summary
@@ -190,14 +200,15 @@ class RightClickListener(val plugin: Mojii) : Listener {
      */
     private fun displayAll(
         backGroundColor: java.awt.Color,
-        team: Team
+        team: Team,
+        g: MojiiGame
     ): Task<List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>, Boolean> {
         var r = false
         return RunnableTask<List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>, List<Pair<WikiMediaSummaryResponse, List<Pair<MojiiMap, ItemFrame>>>>> {
             r = it.isEmpty()
             return@RunnableTask it
         }.apply(Task.forEach {
-            display(backGroundColor, team).apply(WaitTask(plugin.config.effectInterval.value().toLong(), plugin))
+            display(backGroundColor, team, g).apply(WaitTask(plugin.config.effectInterval.value().toLong(), plugin))
         }).apply(RunnableTask { r })
     }
 }

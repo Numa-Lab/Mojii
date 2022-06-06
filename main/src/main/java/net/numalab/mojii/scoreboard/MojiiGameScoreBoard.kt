@@ -16,6 +16,14 @@ class MojiiGameScoreBoard() {
                     text("スコア")
                 )
         }
+
+        private var instance: MojiiGameScoreBoard? = null
+        fun getInstance(): MojiiGameScoreBoard {
+            if (instance == null) {
+                instance = MojiiGameScoreBoard()
+            }
+            return instance!!
+        }
     }
 
     private val obj = getObjective()

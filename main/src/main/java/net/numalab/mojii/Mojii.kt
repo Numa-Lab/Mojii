@@ -9,8 +9,6 @@ import org.bukkit.plugin.java.JavaPlugin
 
 class Mojii : JavaPlugin() {
     lateinit var config: MojiiConfig
-    lateinit var scoreBoard: MojiiGameScoreBoard
-
 
     override fun onEnable() {
         config = MojiiConfig(this).also {
@@ -20,7 +18,6 @@ class Mojii : JavaPlugin() {
         flyLib {
             command(MojiiCommand(config))
         }
-        scoreBoard = MojiiGameScoreBoard()
         Listeners(this)
     }
 
