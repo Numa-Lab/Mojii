@@ -41,11 +41,11 @@ class MojiiGame(val setting: MojiiGameSetting) {
      */
     fun checkWinner(): Team? {
         val score = updateScore()
-        val winner = score.toList().find { it.second >= setting.clearCardAmount }?.first
+        val winner = score.toList().find { it.second >= setting.clearCardAmount }
 
         if (winner != null) {
-            Bukkit.broadcast(winner.displayName() + text("の勝利です", NamedTextColor.GREEN))
-            return winner
+            onClear(winner.first,winner.second)
+            return winner.first
         }
         return null
     }
@@ -65,4 +65,8 @@ class MojiiGame(val setting: MojiiGameSetting) {
         }
         return filteredScore
     }
+}
+
+private fun onClear(winner: Team, score: Int) {
+    Bukkit.broadcast(winner.displayName() + text("が${score}枚取ってクリアしました", NamedTextColor.GREEN))
 }
