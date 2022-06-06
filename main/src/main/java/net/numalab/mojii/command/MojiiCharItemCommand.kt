@@ -42,7 +42,7 @@ class MojiiCharItemCommand : Command("stack") {
                     fail("存在しない文字です")
                     return@executes
                 }
-                val item = genMojiiMap(drawableChar, p.location.world)
+                val item = genMojiiMap(drawableChar, p.location.world).also { it.redraw() }
                 p.inventory.addOrDrop(item.stack)
                 success("「${char}」を生成しました")
             }

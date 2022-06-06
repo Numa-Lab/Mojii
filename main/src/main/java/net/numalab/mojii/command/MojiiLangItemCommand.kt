@@ -25,7 +25,8 @@ class MojiiLangItemCommand : Command("stackLang") {
                     return@executes
                 }
 
-                val items = lang.langSet.chars().chars.map { genMojiiMap(it, p.location.world).stack }
+                val items =
+                    lang.langSet.chars().chars.map { genMojiiMap(it, p.location.world).also { m -> m.redraw() }.stack }
                 p.inventory.addOrDrop(*items.toTypedArray())
                 success("${items.size}個のItemStackを${lang.langSet.langName()}から生成しました")
             }
