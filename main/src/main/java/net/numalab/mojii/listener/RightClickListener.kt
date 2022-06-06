@@ -99,7 +99,7 @@ class RightClickListener(val plugin: Mojii) : Listener {
                             frame.setItem(null)
                         } else {
                             // 次のターンへ
-                            val winner = g.checkWinner()
+                            val winner = g.checkWinner(plugin)
                             if (winner != null) {
                                 // 終了処理
                                 plugin.currentGame = null
