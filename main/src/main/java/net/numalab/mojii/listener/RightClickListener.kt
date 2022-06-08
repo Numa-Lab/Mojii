@@ -76,6 +76,9 @@ class RightClickListener(val plugin: Mojii) : Listener {
         updateFromMojiiMap(frame.location.block.location, team, e, frame)
     }
 
+    // 現在処理中のタスクが存在する
+    private var isPending = false
+
     /**
      * 指定された座標中心に単語ができていないか確認する
      */
@@ -84,6 +87,7 @@ class RightClickListener(val plugin: Mojii) : Listener {
         if (g != null) {
             if (g.getTurnTeam() == team) {
                 // 単語の成立判定をする
+                // TODO 同時に2つ以上のマップ設置を受け入れてしまう
                 val s = StringGetter.getFrom(loc)
                 val task = getSummaryAll(g.setting.lang, exchars = plugin.config.exChars.value(), *s.toTypedArray())
                     .apply(filterSummary())
@@ -107,8 +111,21 @@ class RightClickListener(val plugin: Mojii) : Listener {
                                 g.nextTurn()
                             }
                         }
+
+                        isPending = false
                     })
-                task.run(Unit)
+                if (!isPending) {
+                    isPending = true
+                    task.run(Unit)
+                } else {
+                    // 他に実行中のタスクが存在する
+                    e.player.sendMessage(text("他のピースの処理中です", NamedTextColor.RED))
+                    e.isCancelled = true
+                    // 強制的にアイテムを取り出す
+                    val st = frame.item
+                    e.player.inventory.addOrDrop(st)
+                    frame.setItem(null)
+                }
             } else {
                 // 今ターンのチームではない
                 e.isCancelled = true
