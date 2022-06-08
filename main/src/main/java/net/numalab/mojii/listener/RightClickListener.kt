@@ -87,7 +87,6 @@ class RightClickListener(val plugin: Mojii) : Listener {
         if (g != null) {
             if (g.getTurnTeam() == team) {
                 // 単語の成立判定をする
-                // TODO 同時に2つ以上のマップ設置を受け入れてしまう
                 val s = StringGetter.getFrom(loc)
                 val task = getSummaryAll(g.setting.lang, exchars = plugin.config.exChars.value(), *s.toTypedArray())
                     .apply(filterSummary())
