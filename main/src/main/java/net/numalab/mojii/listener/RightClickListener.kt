@@ -188,8 +188,10 @@ class RightClickListener(val plugin: Mojii) : Listener {
             }
 
             // BroadCast Summary
-            // TODO タイトル以外も出す
-            Bukkit.broadcast(text(it.first.query.getTitle(Gson())!!, NamedTextColor.AQUA))
+            val page = it.first.query.getPages(Gson())[0]
+            Bukkit.broadcast(
+                text("${page.title} : ${page.extract}", NamedTextColor.AQUA)
+            )
 
             return@RunnableTask it
         }

@@ -4,7 +4,6 @@ import net.kunmc.lab.configlib.BaseConfig
 import net.kunmc.lab.configlib.value.EnumValue
 import net.kunmc.lab.configlib.value.IntegerValue
 import net.kunmc.lab.configlib.value.collection.TeamSetValue
-import org.bukkit.DyeColor
 import org.bukkit.GameMode
 import org.bukkit.Particle
 import org.bukkit.plugin.Plugin
