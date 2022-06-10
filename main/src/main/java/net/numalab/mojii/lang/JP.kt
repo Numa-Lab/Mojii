@@ -1,5 +1,6 @@
 package net.numalab.mojii.lang
 
+import net.numalab.mojii.Mojii
 import java.awt.Font
 
 
@@ -18,10 +19,6 @@ class JP : LangSet {
 class JPCharSet : CharSet(
     "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわおんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ".toCharArray()
         .map {
-            FontDrawableChar(it, font)
+            FontDrawableChar(it, Mojii.font)
         }
-) {
-    companion object {
-        val font: Font = Font(Font.SANS_SERIF, Font.PLAIN, 128)
-    }
-}
+)

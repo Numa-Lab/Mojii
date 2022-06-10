@@ -1,6 +1,6 @@
 package net.numalab.mojii.lang
 
-import java.awt.Font
+import net.numalab.mojii.Mojii
 
 class EN : LangSet {
     override fun langName(): String {
@@ -17,9 +17,5 @@ class EN : LangSet {
 }
 
 class ENCharSet : CharSet(
-    "ABCDEFGHIJKLMNOPQRSTUVWXWZ".toCharArray().map { FontDrawableChar(it, font) },
-) {
-    companion object {
-        val font: Font = Font(Font.SANS_SERIF, Font.PLAIN, 128)
-    }
-}
+    "ABCDEFGHIJKLMNOPQRSTUVWXWZ".toCharArray().map { FontDrawableChar(it, Mojii.font) },
+)
